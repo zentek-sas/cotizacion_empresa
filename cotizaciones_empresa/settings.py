@@ -11,13 +11,15 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 import os
 from pathlib import Path
-from dotenv import load_dotenv
+import environ
 
-load_dotenv()
+env = environ.Env()
+environ.Env.read_env()
 
-SECRET_KEY = os.getenv('SECRET_KEY')
-DEBUG = os.getenv('DEBUG') == 'True'
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(',')
+SECRET_KEY = env('SECRET_KEY')
+DEBUG = env.bool('DEBUG', default=False)
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1'])
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,13 +29,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-knj-$s%t$nk^9z=v3vbp91+_ry5y^vntj%%cd0x2kk6_u4jy%9'
+##SECRET_KEY = 'django-insecure-knj-$s%t$nk^9z=v3vbp91+_ry5y^vntj%%cd0x2kk6_u4jy%9'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+##DEBUG = True
 
-ALLOWED_HOSTS = []
+##ALLOWED_HOSTS = []
 
+DATABASES = {
+    'default': env.db(),
+}
 
 # Application definition
 
@@ -44,6 +49,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    #third-party apps
+    'crispy_forms',
+    'crispy_bootstrap5',
+    # Local apps
+    'apps.usuarios',
+    'apps.cotizaciones',
+    'apps.clientes',
 ]
 
 MIDDLEWARE = [
@@ -79,12 +91,21 @@ WSGI_APPLICATION = 'cotizaciones_empresa.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+##DATABASES = {
+##    'default': {
+##        'ENGINE': 'django.db.backends.sqlite3',
+##        'NAME': BASE_DIR / 'db.sqlite3',
+##    }
+##}
+
+# Configuración de crispy forms
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"
+
+# Configuración de autenticación
+AUTH_USER_MODEL = 'usuarios.UsuarioCustom'
+LOGIN_REDIRECT_URL = 'inicio'
+LOGOUT_REDIRECT_URL = 'login'
 
 
 # Password validation
@@ -122,7 +143,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
